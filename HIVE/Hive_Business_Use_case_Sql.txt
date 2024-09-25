@@ -1,0 +1,102 @@
+SQL IN HIVE
+
+
+hive
+show databases;
+CREATE DATABASE practice924;
+use practice924;
+-----------------------------------------------------------
+CREATE TABLE sales_data (
+  sale_id INT,
+  product_id INT,
+  region_id INT,
+  sale_amount FLOAT,
+  sale_date DATE
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+INSERT INTO TABLE sales_data VALUES
+(1, 101, 1, 500.00, '2023-08-01'),
+(2, 102, 1, 600.00, '2023-08-02'),
+(3, 103, 2, 700.00, '2023-08-03'),
+(4, 104, 2, 800.00, '2023-08-04'),
+(5, 101, 3, 400.00, '2023-08-05');
+
+show tables;
+----------------------------------------------------------------
+CREATE TABLE product_data (
+  product_id INT,
+  product_name STRING,
+  product_category STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+
+INSERT INTO TABLE product_data VALUES
+(101, 'Laptop', 'Electronics'),
+(102, 'Mobile', 'Electronics'),
+(103, 'Chair', 'Furniture'),
+(104, 'Table', 'Furniture');
+
+--------------------------------------------------------------
+CREATE TABLE region_data (
+  region_id INT,
+  region_name STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+INSERT INTO TABLE region_data VALUES
+(1, 'North'),
+(2, 'South'),
+(3, 'East');
+
+----------------------------------------------------------------
+
+SELECT p.category, SUM(s.sale_amount) AS total_sales
+FROM sales_data s
+JOIN product_data p ON s.product_id = p.product_id
+GROUP BY p.category;
+
+
+
+
+
+---------------------------------------------------------------
+
+SELECT r.region_name, AVG(s.sale_amount) AS avg_sales
+FROM sales_data s
+JOIN region_data r ON s.region_id = r.region_id
+GROUP BY r.region_name;
+
+
+----------------------------------------------------------------
+
+
+
+SELECT p.product_name, SUM(s.sale_amount) AS total_sales
+FROM sales_data s
+JOIN product_data p ON s.product_id = p.product_id
+GROUP BY p.product_name
+ORDER BY total_sales DESC
+LIMIT 3;
+
+
+-------------------------------------------------------------------
+
+WITH avg_sales_all AS (
+    SELECT AVG(sale_amount) AS avg_sales FROM sales_data
+)
+SELECT r.region_name, SUM(s.sale_amount) AS total_sales
+FROM sales_data s
+JOIN region_data r ON s.region_id = r.region_id
+GROUP BY r.region_name
+HAVING SUM(s.sale_amount) > (SELECT avg_sales FROM avg_sales_all);
+
+
+-------------------------------------------------------------------
+
+
+
